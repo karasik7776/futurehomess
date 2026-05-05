@@ -63,7 +63,6 @@ class AdminState(StatesGroup):
     waiting_for_search_id = State()
     waiting_for_broadcast = State()
     waiting_for_result_text = State()
-    waiting_for_result_photo = State()
     waiting_for_chat_reply = State()
 
 # ========== ИНИЦИАЛИЗАЦИЯ ==========
@@ -210,6 +209,125 @@ def get_cancel_keyboard():
     builder.add(KeyboardButton(text="❌ Отменить"))
     return builder.as_markup(resize_keyboard=True)
 
+def get_room_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for room in ROOMS:
+        builder.add(KeyboardButton(text=room))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_size_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for size in SIZES:
+        builder.add(KeyboardButton(text=size))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_windows_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for w in WINDOWS:
+        builder.add(KeyboardButton(text=w))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_style_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for style in STYLES:
+        builder.add(KeyboardButton(text=style))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_mood_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for mood in MOODS:
+        builder.add(KeyboardButton(text=mood))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_budget_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for budget in BUDGETS:
+        builder.add(KeyboardButton(text=budget))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_tones_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for tone in TONES:
+        builder.add(KeyboardButton(text=tone))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_zones_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for zone in ZONES:
+        builder.add(KeyboardButton(text=zone))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_people_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for count in PEOPLE_COUNTS:
+        builder.add(KeyboardButton(text=count))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_lighting_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for light in LIGHTINGS:
+        builder.add(KeyboardButton(text=light))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_furniture_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for furniture in FURNITURE_LIST:
+        builder.add(KeyboardButton(text=furniture))
+    builder.add(KeyboardButton(text="свой вариант"))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_tech_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for tech in TECH_LIST:
+        builder.add(KeyboardButton(text=tech))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_materials_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for material in MATERIALS:
+        builder.add(KeyboardButton(text=material))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(1)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_pets_keyboard():
+    builder = ReplyKeyboardBuilder()
+    for pet in PETS:
+        builder.add(KeyboardButton(text=pet))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    builder.adjust(2)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_photos_keyboard():
+    builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text="✅ ГОТОВО"))
+    builder.add(KeyboardButton(text="❌ Отменить"))
+    return builder.as_markup(resize_keyboard=True)
+
 # ========== ФОРМАТИРОВАНИЕ ==========
 def format_answers(answers):
     text = "📋 ВАША АНКЕТА:\n━━━━━━━━━━━━━━━━━━━━\n"
@@ -274,10 +392,7 @@ async def show_help(message: types.Message):
 """
     await message.answer(help_text)
 
-# ========== ОПРОС (СОКРАЩЕН ДЛЯ ЭКОНОМИИ МЕСТА) ==========
-# Полный опрос такой же, как в предыдущей версии
-# Для экономии места здесь оставлю основные обработчики
-
+# ========== ОПРОС ПОЛЬЗОВАТЕЛЯ ==========
 @dp.message(F.text == "🏠 Новый заказ")
 async def new_order(message: types.Message, state: FSMContext):
     await state.clear()
@@ -285,22 +400,334 @@ async def new_order(message: types.Message, state: FSMContext):
     await message.answer("🛋️ СОЗДАДИМ ДИЗАЙН ВАШЕЙ МЕЧТЫ!\n\nВыберите комнату:", reply_markup=get_room_keyboard())
     await state.set_state(InteriorForm.room)
 
-def get_room_keyboard():
-    builder = ReplyKeyboardBuilder()
-    for room in ROOMS:
-        builder.add(KeyboardButton(text=room))
-    builder.add(KeyboardButton(text="❌ Отменить"))
-    builder.adjust(2)
-    return builder.as_markup(resize_keyboard=True)
+@dp.message(InteriorForm.room)
+async def process_room(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text not in ROOMS:
+        await message.answer("Выберите комнату из списка:", reply_markup=get_room_keyboard())
+        return
+    await state.update_data(answers={"Комната": message.text})
+    await message.answer("📏 Какая площадь комнаты?", reply_markup=get_size_keyboard())
+    await state.set_state(InteriorForm.size)
 
-# ... (остальные обработчики опроса такие же, как в предыдущей версии)
-# Для полного кода ставлю заглушку - в финальном файле будет полный опрос
+@dp.message(InteriorForm.size)
+async def process_size(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text not in SIZES:
+        await message.answer("Выберите площадь из списка:", reply_markup=get_size_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Площадь"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("🪟 Сколько окон в комнате?", reply_markup=get_windows_keyboard())
+    await state.set_state(InteriorForm.windows)
 
-# ========== ЗАВЕРШЕНИЕ ОПРОСА ==========
-async def finish_order(message: types.Message, state: FSMContext):
+@dp.message(InteriorForm.windows)
+async def process_windows(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text not in WINDOWS:
+        await message.answer("Выберите количество окон:", reply_markup=get_windows_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Окна"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("🎨 Какой стиль интерьера вам ближе?", reply_markup=get_style_keyboard())
+    await state.set_state(InteriorForm.style)
+
+@dp.message(InteriorForm.style)
+async def process_style(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text == "свой вариант":
+        await message.answer("✏️ Напишите свой вариант стиля:", reply_markup=get_cancel_keyboard())
+        await state.set_state(InteriorForm.custom_style)
+        return
+    if message.text not in STYLES:
+        await message.answer("Выберите стиль из списка:", reply_markup=get_style_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Стиль"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("😊 Какое настроение хотите создать?", reply_markup=get_mood_keyboard())
+    await state.set_state(InteriorForm.mood)
+
+@dp.message(InteriorForm.custom_style)
+async def process_custom_style(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Стиль"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("😊 Какое настроение хотите создать?", reply_markup=get_mood_keyboard())
+    await state.set_state(InteriorForm.mood)
+
+@dp.message(InteriorForm.mood)
+async def process_mood(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text == "другое":
+        await message.answer("✏️ Напишите своё настроение:", reply_markup=get_cancel_keyboard())
+        await state.set_state(InteriorForm.custom_mood)
+        return
+    if message.text not in MOODS:
+        await message.answer("Выберите настроение из списка:", reply_markup=get_mood_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Настроение"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("💰 Есть бюджетные ограничения?", reply_markup=get_budget_keyboard())
+    await state.set_state(InteriorForm.budget)
+
+@dp.message(InteriorForm.custom_mood)
+async def process_custom_mood(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Настроение"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("💰 Есть бюджетные ограничения?", reply_markup=get_budget_keyboard())
+    await state.set_state(InteriorForm.budget)
+
+@dp.message(InteriorForm.budget)
+async def process_budget(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text not in BUDGETS:
+        await message.answer("Выберите бюджет из списка:", reply_markup=get_budget_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Бюджет"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("🎨 Какие цвета вы хотите видеть?\n(напишите через запятую)", reply_markup=get_cancel_keyboard())
+    await state.set_state(InteriorForm.colors_want)
+
+@dp.message(InteriorForm.colors_want)
+async def process_colors_want(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Желаемые цвета"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("🚫 Какие цвета НЕ хотите?\n(напишите 'нет' если все ок)", reply_markup=get_cancel_keyboard())
+    await state.set_state(InteriorForm.colors_not_want)
+
+@dp.message(InteriorForm.colors_not_want)
+async def process_colors_not_want(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Нежелательные цвета"] = message.text if message.text != "нет" else "—"
+    await state.update_data(answers=answers)
+    await message.answer("🌓 Светлые или тёмные тона?", reply_markup=get_tones_keyboard())
+    await state.set_state(InteriorForm.tones)
+
+@dp.message(InteriorForm.tones)
+async def process_tones(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text not in TONES:
+        await message.answer("Выберите тона из списка:", reply_markup=get_tones_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Тона"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("📍 Какие зоны нужны в комнате?\n(выберите через запятую)", reply_markup=get_zones_keyboard())
+    await state.set_state(InteriorForm.zones)
+
+@dp.message(InteriorForm.zones)
+async def process_zones(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text == "другое":
+        await message.answer("✏️ Напишите какие зоны нужны:", reply_markup=get_cancel_keyboard())
+        await state.set_state(InteriorForm.custom_zones)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Зоны"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("👥 Сколько человек будут использовать комнату?", reply_markup=get_people_keyboard())
+    await state.set_state(InteriorForm.people_count)
+
+@dp.message(InteriorForm.custom_zones)
+async def process_custom_zones(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Зоны"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("👥 Сколько человек будут использовать комнату?", reply_markup=get_people_keyboard())
+    await state.set_state(InteriorForm.people_count)
+
+@dp.message(InteriorForm.people_count)
+async def process_people_count(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text not in PEOPLE_COUNTS:
+        await message.answer("Выберите количество:", reply_markup=get_people_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Количество человек"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("💡 Какой тип освещения вам нравится?", reply_markup=get_lighting_keyboard())
+    await state.set_state(InteriorForm.lighting)
+
+@dp.message(InteriorForm.lighting)
+async def process_lighting(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text not in LIGHTINGS:
+        await message.answer("Выберите освещение:", reply_markup=get_lighting_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Освещение"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("🛋️ Какая мебель обязательно должна быть?\n(выберите через запятую)", reply_markup=get_furniture_keyboard())
+    await state.set_state(InteriorForm.furniture)
+
+@dp.message(InteriorForm.furniture)
+async def process_furniture(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Мебель"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("📱 Какая техника есть?\n(выберите через запятую или 'нет')", reply_markup=get_tech_keyboard())
+    await state.set_state(InteriorForm.tech)
+
+@dp.message(InteriorForm.tech)
+async def process_tech(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Техника"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("🌱 Экологические материалы важны?", reply_markup=get_materials_keyboard())
+    await state.set_state(InteriorForm.materials)
+
+@dp.message(InteriorForm.materials)
+async def process_materials(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text not in MATERIALS:
+        await message.answer("Выберите вариант:", reply_markup=get_materials_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Экоматериалы"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("🐕 Есть домашние питомцы?", reply_markup=get_pets_keyboard())
+    await state.set_state(InteriorForm.pets)
+
+@dp.message(InteriorForm.pets)
+async def process_pets(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    if message.text not in PETS:
+        await message.answer("Выберите вариант:", reply_markup=get_pets_keyboard())
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Питомцы"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("😞 Что категорически не нравится в текущем интерьере?", reply_markup=get_cancel_keyboard())
+    await state.set_state(InteriorForm.dislike)
+
+@dp.message(InteriorForm.dislike)
+async def process_dislike(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Что не нравится"] = message.text
+    await state.update_data(answers=answers)
+    await message.answer("❤️ Что хотите сохранить?\n(напишите 'ничего' если ничего)", reply_markup=get_cancel_keyboard())
+    await state.set_state(InteriorForm.keep)
+
+@dp.message(InteriorForm.keep)
+async def process_keep(message: types.Message, state: FSMContext):
+    if message.text == "❌ Отменить":
+        await cancel_order(message, state)
+        return
+    data = await state.update_data()
+    answers = data.get("answers", {})
+    answers["Сохранить"] = message.text
+    await state.update_data(answers=answers)
+    
+    answers_text = format_answers(answers)
+    await message.answer(
+        f"{answers_text}\n\n━━━━━━━━━━━━━━━━━━━━\n📸 ТЕПЕРЬ ЗАГРУЗИТЕ ФОТО КОМНАТЫ (1-3 шт)\n\nПросто отправьте фото одно за другим.\nКогда закончите - нажмите «ГОТОВО»",
+        reply_markup=get_photos_keyboard()
+    )
+    await state.set_state(InteriorForm.photos)
+    await state.update_data(photos=[])
+
+@dp.message(InteriorForm.photos, F.photo)
+async def process_photo(message: types.Message, state: FSMContext):
+    data = await state.update_data()
+    photos = data.get("photos", [])
+    
+    if len(photos) >= 3:
+        await message.answer("Уже 3 фото. Нажмите «ГОТОВО»")
+        return
+    
+    photo_file_id = message.photo[-1].file_id
+    photos.append(photo_file_id)
+    await state.update_data(photos=photos)
+    
+    remaining = 3 - len(photos)
+    if remaining > 0:
+        await message.answer(f"✅ Фото загружено! Осталось {remaining}. Или нажмите «ГОТОВО»")
+    else:
+        await message.answer("✅ Загружено 3 фото! Нажмите «ГОТОВО»")
+
+@dp.message(InteriorForm.photos, F.text == "✅ ГОТОВО")
+async def finish_photos(message: types.Message, state: FSMContext):
     data = await state.update_data()
     photos = data.get("photos", [])
     answers = data.get("answers", {})
+    
+    if len(photos) == 0:
+        await message.answer("❌ Нужно хотя бы одно фото!")
+        return
     
     answers["Количество фото"] = len(photos)
     request_id = save_request(message.from_user.id, answers, photos)
@@ -314,10 +741,14 @@ async def finish_order(message: types.Message, state: FSMContext):
     for admin_id in ADMIN_IDS:
         try:
             await notify_admin(admin_id, request_id, message.from_user.id, answers, photos)
-        except:
-            pass
+        except Exception as e:
+            print(f"Ошибка уведомления админа {admin_id}: {e}")
     
     await state.clear()
+
+@dp.message(InteriorForm.photos)
+async def invalid_photos(message: types.Message, state: FSMContext):
+    await message.answer("📸 Отправьте фото или нажмите «ГОТОВО»", reply_markup=get_photos_keyboard())
 
 async def notify_admin(admin_id, request_id, user_id, answers, photos):
     text = f"""
@@ -380,14 +811,17 @@ async def view_new_requests(message: types.Message):
     for req in requests:
         req_id, user_id, status, created_at = req
         full_req = get_request_by_id(req_id)
+        if not full_req:
+            continue
         answers = json.loads(full_req[4])
         photos = json.loads(full_req[5])
         
         text = format_request_for_admin(req_id, user_id, status, created_at, answers)
         await message.answer(text)
         
-        for i, photo_id in enumerate(photos[:3], 1):
-            await bot.send_photo(message.chat.id, photo_id, caption=f"Фото {i}")
+        if photos:
+            for i, photo_id in enumerate(photos[:3], 1):
+                await bot.send_photo(message.chat.id, photo_id, caption=f"Фото {i}")
         
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="✅ ОТПРАВИТЬ РЕЗУЛЬТАТ", callback_data=f"result_{req_id}")],
@@ -420,7 +854,7 @@ async def search_request_start(message: types.Message, state: FSMContext):
     if not is_admin(message.from_user.id):
         return
     await message.answer("Введите номер заявки для поиска:", reply_markup=get_cancel_keyboard())
-    await AdminState.waiting_for_search_id.set()
+    await state.set_state(AdminState.waiting_for_search_id)
 
 @dp.message(AdminState.waiting_for_search_id)
 async def search_request_by_id(message: types.Message, state: FSMContext):
@@ -466,14 +900,14 @@ async def chat_with_user_start(message: types.Message, state: FSMContext):
     if not is_admin(message.from_user.id):
         return
     await message.answer("Введите номер заявки для чата с пользователем:", reply_markup=get_cancel_keyboard())
-    await AdminState.waiting_for_search_id.set()  # Используем то же состояние, потом перенаправим
+    await state.set_state(AdminState.waiting_for_search_id)
 
 @dp.message(F.text == "📢 Рассылка")
 async def broadcast_start(message: types.Message, state: FSMContext):
     if not is_admin(message.from_user.id):
         return
     await message.answer("📢 Введите текст для рассылки всем пользователям:", reply_markup=get_cancel_keyboard())
-    await AdminState.waiting_for_broadcast.set()
+    await state.set_state(AdminState.waiting_for_broadcast)
 
 @dp.message(AdminState.waiting_for_broadcast)
 async def process_broadcast(message: types.Message, state: FSMContext):
@@ -510,7 +944,7 @@ async def exit_admin(message: types.Message):
         return
     await message.answer("Выход из админ-панели.", reply_markup=get_main_keyboard(message.from_user.id))
 
-# ========== ОТПРАВКА РЕЗУЛЬТАТА (ОСНОВНАЯ ФУНКЦИЯ) ==========
+# ========== ОТПРАВКА РЕЗУЛЬТАТА ==========
 @dp.callback_query(lambda c: c.data and c.data.startswith('result_'))
 async def send_result_start(callback: types.CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
@@ -522,10 +956,10 @@ async def send_result_start(callback: types.CallbackQuery, state: FSMContext):
     
     await callback.message.answer(f"✍️ ОТПРАВКА РЕЗУЛЬТАТА ДЛЯ ЗАЯВКИ #{request_id}\n\nВведите текст и отправьте. Можете приложить фото.\nПосле отправки заявка автоматически станет ВЫПОЛНЕННОЙ.", reply_markup=get_cancel_keyboard())
     await callback.answer()
-    await AdminState.waiting_for_result_text.set()
+    await state.set_state(AdminState.waiting_for_result_text)
 
 @dp.message(AdminState.waiting_for_result_text)
-async def process_result_with_photo(message: types.Message, state: FSMContext):
+async def process_result(message: types.Message, state: FSMContext):
     if message.text and message.text == "❌ Отменить":
         await state.clear()
         await message.answer("Отмена.", reply_markup=get_admin_keyboard())
@@ -548,7 +982,7 @@ async def process_result_with_photo(message: types.Message, state: FSMContext):
     user_id = req[1]
     reply_text = message.text if message.text else "Ваш дизайн-проект готов!"
     
-    # Если есть фото - отправляем с фото
+    # Отправляем результат пользователю
     if message.photo:
         photo_id = message.photo[-1].file_id
         caption = f"🏠 ВАШ ДИЗАЙН-ПРОЕКТ ГОТОВ!\n\nЗаявка #{request_id}\n\n{reply_text}"
@@ -558,7 +992,7 @@ async def process_result_with_photo(message: types.Message, state: FSMContext):
     else:
         await bot.send_message(user_id, f"🏠 ВАШ ДИЗАЙН-ПРОЕКТ ГОТОВ!\n\nЗаявка #{request_id}\n\n{reply_text}")
     
-    # Обновляем статус заявки
+    # Обновляем статус
     update_request_status(request_id, 'completed')
     
     await message.answer(f"✅ РЕЗУЛЬТАТ ОТПРАВЛЕН!\nЗаявка #{request_id} закрыта.", reply_markup=get_admin_keyboard())
@@ -583,19 +1017,19 @@ async def chat_start(callback: types.CallbackQuery, state: FSMContext):
     
     await state.update_data(chat_request_id=request_id, chat_user_id=user_id)
     
-    # Показываем историю переписки
+    # Показываем историю
     messages = get_messages(request_id)
     if messages:
         history = "📜 ИСТОРИЯ ПЕРЕПИСКИ:\n━━━━━━━━━━━━━━━━━━━━\n"
         for msg in messages:
             from_admin, text, photo, created_at = msg
             sender = "Админ" if from_admin else "Клиент"
-            history += f"[{created_at[11:16]}] {sender}: {text[:50]}\n"
+            history += f"[{created_at[11:16]}] {sender}: {text if text else '[Фото]'}\n"
         await callback.message.answer(history)
     
-    await callback.message.answer(f"💬 ЧАТ С ПОЛЬЗОВАТЕЛЕМ (заявка #{request_id})\n\nПросто отправьте сообщение, оно будет доставлено пользователю. Пользователь тоже может вам отвечать!\n\nЧтобы выйти из чата, нажмите «❌ Отменить»", reply_markup=get_cancel_keyboard())
+    await callback.message.answer(f"💬 ЧАТ С ПОЛЬЗОВАТЕЛЕМ (заявка #{request_id})\n\nПросто отправьте сообщение, оно будет доставлено пользователю.\n\nЧтобы выйти, нажмите «❌ Отменить»", reply_markup=get_cancel_keyboard())
     await callback.answer()
-    await AdminState.waiting_for_chat_reply.set()
+    await state.set_state(AdminState.waiting_for_chat_reply)
 
 @dp.message(AdminState.waiting_for_chat_reply)
 async def chat_send_to_user(message: types.Message, state: FSMContext):
@@ -613,12 +1047,12 @@ async def chat_send_to_user(message: types.Message, state: FSMContext):
         await state.clear()
         return
     
-    # Отправляем пользователю
     try:
         if message.photo:
             photo_id = message.photo[-1].file_id
-            await bot.send_photo(user_id, photo_id, caption=f"💬 Сообщение от дизайнера:\n\n{message.caption if message.caption else ''}")
-            save_message(request_id, 1, message.caption or "Фото", photo_id)
+            caption = message.caption if message.caption else ""
+            await bot.send_photo(user_id, photo_id, caption=f"💬 Сообщение от дизайнера:\n\n{caption}")
+            save_message(request_id, 1, caption or "Фото", photo_id)
         elif message.text:
             await bot.send_message(user_id, f"💬 Сообщение от дизайнера:\n\n{message.text}")
             save_message(request_id, 1, message.text, None)
@@ -630,10 +1064,26 @@ async def chat_send_to_user(message: types.Message, state: FSMContext):
     except Exception as e:
         await message.answer(f"❌ Ошибка отправки: {e}")
 
-# ========== ПРИЕМ СООБЩЕНИЙ ОТ ПОЛЬЗОВАТЕЛЕЙ В ЧАТЕ ==========
-@dp.message(F.text, ~F.text.in_({'🏠 Новый заказ', '📋 Мои заказы', '❓ Помощь', '👑 Админ панель', '🆕 Новые заявки', '📋 Все заявки', '🔍 Поиск заявки', '💬 Чат с пользователем', '📢 Рассылка', '◀️ Выйти из админки', '❌ Отменить'}))
+# ========== ПРИЕМ СООБЩЕНИЙ ОТ ПОЛЬЗОВАТЕЛЕЙ ==========
+@dp.message(F.text)
 async def handle_user_message(message: types.Message, state: FSMContext):
-    # Проверяем, есть ли у пользователя активные заявки
+    # Проверяем, что это не команда и не кнопка
+    if message.text.startswith('/'):
+        return
+    
+    # Проверяем, находится ли пользователь в процессе опроса
+    current_state = await state.get_state()
+    if current_state and current_state.startswith('InteriorForm'):
+        return
+    
+    # Игнорируем системные кнопки
+    system_buttons = ['🏠 Новый заказ', '📋 Мои заказы', '❓ Помощь', '👑 Админ панель', 
+                      '🆕 Новые заявки', '📋 Все заявки', '🔍 Поиск заявки', '💬 Чат с пользователем', 
+                      '📢 Рассылка', '◀️ Выйти из админки', '❌ Отменить', '✅ ГОТОВО']
+    if message.text in system_buttons:
+        return
+    
+    # Находим последнюю заявку пользователя
     conn = sqlite3.connect('future_home.db')
     cursor = conn.cursor()
     cursor.execute('SELECT id FROM requests WHERE user_id = ? ORDER BY created_at DESC LIMIT 1', (message.from_user.id,))
@@ -646,7 +1096,7 @@ async def handle_user_message(message: types.Message, state: FSMContext):
         
         # Уведомляем админов
         for admin_id in ADMIN_IDS:
-            await bot.send_message(admin_id, f"💬 НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ\n\nЗаявка #{request_id}\n\n{message.text}\n\nЧтобы ответить, используйте «💬 Чат с пользователем» в админ-панели и введите {request_id}")
+            await bot.send_message(admin_id, f"💬 НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ\n\nЗаявка #{request_id}\n\n{message.text}\n\nЧтобы ответить, используйте «💬 Чат с пользователем» и введите {request_id}")
 
 # ========== ОТМЕНА ==========
 @dp.message(F.text == "❌ Отменить")
