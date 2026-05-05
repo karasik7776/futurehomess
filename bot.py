@@ -16,8 +16,8 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 import logging
 
 # ========== КОНФИГУРАЦИЯ ==========
-BOT_TOKEN = "ТВОЙ_ТОКЕН_БОТА"  # Замени на свой токен от @BotFather
-ADMIN_IDS = [123456789]  # Замени на свой Telegram ID
+BOT_TOKEN = "8693273180:AAHkR8tDpDoP13Cw_FSM-qcoN3Ru1H8gJdE"  # Замени на свой токен от @BotFather
+ADMIN_IDS = [1226310185, 480615667, 1031022066]  # Замени на свой Telegram ID
 
 # ========== НАСТРОЙКА ЛОГИРОВАНИЯ ==========
 logging.basicConfig(level=logging.INFO)
